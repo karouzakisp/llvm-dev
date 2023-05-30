@@ -369,11 +369,18 @@ public:
   /// which supports this flag. See LangRef.html for the meaning of this flag.
   void setIsExact(bool b = true);
 
+  /// Set or clear the sext flag on this instruction, wich must be an operator
+  /// which support this flag. In our case OverflowingCastOperator.
+  void setCanBeSext(bool b = true);
+
   /// Determine whether the no unsigned wrap flag is set.
   bool hasNoUnsignedWrap() const LLVM_READONLY;
 
   /// Determine whether the no signed wrap flag is set.
   bool hasNoSignedWrap() const LLVM_READONLY;
+ 
+  /// Determine whether the sext flag is set.  
+  bool canBeSext() const LLVM_READONLY;
 
   /// Return true if this operator has flags which may cause this instruction
   /// to evaluate to poison despite having non-poison inputs.

@@ -170,12 +170,21 @@ void Instruction::setIsExact(bool b) {
   cast<PossiblyExactOperator>(this)->setIsExact(b);
 }
 
+void Instruction::setCanBeSext(bool b){
+  cast<OverflowingCastOperator>(this)->setHasNoSignedWrap(b);
+}
+
+
 bool Instruction::hasNoUnsignedWrap() const {
   return cast<OverflowingBinaryOperator>(this)->hasNoUnsignedWrap();
 }
 
 bool Instruction::hasNoSignedWrap() const {
   return cast<OverflowingBinaryOperator>(this)->hasNoSignedWrap();
+}
+
+bool Instruction::canBeSext() const {
+  return cast<OverflowingCastOperator>(this)->hasNoSignedWrap();
 }
 
 bool Instruction::hasPoisonGeneratingFlags() const {
@@ -202,7 +211,12 @@ void Instruction::dropPoisonGeneratingFlags() {
   case Instruction::GetElementPtr:
     cast<GetElementPtrInst>(this)->setIsInBounds(false);
     break;
+  
+  case Instruction::ZExt:
+    cast<OverflowingCastOperator>(this)->setHasNoSignedWrap(false);
+    break;
   }
+
   if (isa<FPMathOperator>(this)) {
     setHasNoNaNs(false);
     setHasNoInfs(false);
