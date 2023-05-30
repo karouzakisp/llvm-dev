@@ -1047,9 +1047,10 @@ static bool processSExt(SExtInst *SDI, LazyValueInfo *LVI) {
   auto *ZExt = CastInst::CreateZExtOrBitCast(Base, SDI->getType(), "", SDI);
   ZExt->takeName(SDI);
   ZExt->setDebugLoc(SDI->getDebugLoc());
+  ZExt->setCanBeSext(true);
   SDI->replaceAllUsesWith(ZExt);
   SDI->eraseFromParent();
-
+  
   return true;
 }
 

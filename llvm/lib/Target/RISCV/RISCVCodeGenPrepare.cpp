@@ -29,6 +29,9 @@ using namespace llvm;
 #define PASS_NAME "RISCV CodeGenPrepare"
 
 STATISTIC(NumZExtToSExt, "Number of SExt instructions converted to ZExt");
+STATISTIC(NumZExtToSExtNonNeg, "My Number of SExt non negative value instructions converted to ZExt");
+
+
 
 namespace {
 
@@ -83,6 +86,33 @@ bool RISCVCodeGenPrepare::visitZExtInst(ZExtInst &ZExt) {
     ++NumZExtToSExt;
     return true;
   }
+
+
+  // Look for an non negative zext(value) and replace it with sext.
+  if(isKnownNonNegative(Src, *DL)){
+    auto SExt = new SExtInst(Src, ZExt.getType(), "", &ZExt);
+    SExt->takeName(&ZExt);
+    SExt->setDebugLoc(ZExt.getDebugLoc());
+
+    ZExt.replaceAllUsesWith(SExt);
+    ZExt.eraseFromParent();
+    ++NumZExtToSExtNonNeg;
+    return true;
+  }
+
+  if(ZExt.canBeSext() ){
+    auto SExt = new SExtInst(Src, ZExt.getType(), "", &ZExt);
+    SExt->takeName(&ZExt);
+    SExt->setDebugLoc(ZExt.getDebugLoc());
+
+    ZExt.replaceAllUsesWith(SExt);
+    ZExt.eraseFromParent();
+    ++NumZExtToSExtNonNeg;
+    return true;
+
+  }
+
+
 
   // Convert (zext (abs(i32 X, i1 1))) -> (sext (abs(i32 X, i1 1))). If abs of
   // INT_MIN is poison, the sign bit is zero.
