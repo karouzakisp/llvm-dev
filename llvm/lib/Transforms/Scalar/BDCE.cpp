@@ -119,8 +119,10 @@ static bool bitTrackingDCE(Function &F, DemandedBits &DB) {
       if (Demanded.countLeadingZeros() >= (DestBitSize - SrcBitSize)) {
         clearAssumptionsOfUsers(SE, DB);
         IRBuilder<> Builder(SE);
-        I.replaceAllUsesWith(
-            Builder.CreateZExt(SE->getOperand(0), DstTy, SE->getName()));
+        auto *ZExt = new ZExtInst(SE->getOperand(0), DstTy, SE->getName());
+        ZExt->setCanBeSext(true);
+        SE->replaceAllUsesWith(ZExt);
+       // ZExt->setCanBeSext(true);
         Worklist.push_back(SE);
         Changed = true;
         NumSExt2ZExt++;
