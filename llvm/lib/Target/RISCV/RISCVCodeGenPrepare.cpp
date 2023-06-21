@@ -88,6 +88,7 @@ bool RISCVCodeGenPrepare::visitZExtInst(ZExtInst &ZExt) {
   }
 
 
+
   // Look for an non negative zext(value) and replace it with sext.
   if(isKnownNonNegative(Src, *DL)){
     auto SExt = new SExtInst(Src, ZExt.getType(), "", &ZExt);
@@ -100,6 +101,7 @@ bool RISCVCodeGenPrepare::visitZExtInst(ZExtInst &ZExt) {
     return true;
   }
 
+  // Look for zext instructions that can be sext.
   if(ZExt.canBeSext() ){
     auto SExt = new SExtInst(Src, ZExt.getType(), "", &ZExt);
     SExt->takeName(&ZExt);
