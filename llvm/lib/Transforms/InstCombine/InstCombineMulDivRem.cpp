@@ -395,15 +395,25 @@ Instruction *InstCombinerImpl::visitMul(BinaryOperator &I) {
     return replaceInstUsesWith(I, R);
 
   // (zext bool X) * (zext bool Y) --> zext (and X, Y)
-  // (sext bool X) * (sext bool Y) --> zext (and X, Y)
   // Note: -1 * -1 == 1 * 1 == 1 (if the extends match, the result is the same)
-  if (((match(Op0, m_ZExt(m_Value(X))) && match(Op1, m_ZExt(m_Value(Y)))) ||
-       (match(Op0, m_SExt(m_Value(X))) && match(Op1, m_SExt(m_Value(Y))))) &&
+  if ((match(Op0, m_ZExt(m_Value(X))) && match(Op1, m_ZExt(m_Value(Y)))) &&
       X->getType()->isIntOrIntVectorTy(1) && X->getType() == Y->getType() &&
       (Op0->hasOneUse() || Op1->hasOneUse() || X == Y)) {
     Value *And = Builder.CreateAnd(X, Y, "mulbool");
     return CastInst::Create(Instruction::ZExt, And, Ty);
   }
+
+  // (sext bool X) * (sext bool Y) --> zext (and X, Y)
+  // Note: -1 * -1 == 1 * 1 == 1 (if the extends match, the result is the same)
+  if ((match(Op0, m_SExt(m_Value(X))) && match(Op1, m_SExt(m_Value(Y)))) &&
+      X->getType()->isIntOrIntVectorTy(1) && X->getType() == Y->getType() &&
+      (Op0->hasOneUse() || Op1->hasOneUse() || X == Y)) {
+    Value *And = Builder.CreateAnd(X, Y, "mulbool");
+    auto *ZExtInst = CastInst::Create(Instruction::ZExt, And, Ty);
+    ZExtInst->setCanBeSext(true);
+    return ZExtInst;
+  }
+
   // (sext bool X) * (zext bool Y) --> sext (and X, Y)
   // (zext bool X) * (sext bool Y) --> sext (and X, Y)
   // Note: -1 * 1 == 1 * -1  == -1

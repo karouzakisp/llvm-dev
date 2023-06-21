@@ -1507,8 +1507,11 @@ Instruction *InstCombinerImpl::visitSExt(SExtInst &Sext) {
   unsigned DestBitSize = DestTy->getScalarSizeInBits();
 
   // If the value being extended is zero or positive, use a zext instead.
-  if (isKnownNonNegative(Src, DL, 0, &AC, &Sext, &DT))
-    return CastInst::Create(Instruction::ZExt, Src, DestTy);
+  if (isKnownNonNegative(Src, DL, 0, &AC, &Sext, &DT)) {
+    auto *ZExtInst = CastInst::Create(Instruction::ZExt, Src, DestTy);
+    ZExtInst->setCanBeSext(true);
+    return ZExtInst;
+  }
 
   // Try to extend the entire expression tree to the wide destination type.
   if (shouldChangeType(SrcTy, DestTy) && canEvaluateSExtd(Src, DestTy)) {
