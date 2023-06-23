@@ -171,7 +171,7 @@ void Instruction::setIsExact(bool b) {
 }
 
 void Instruction::setCanBeSext(bool b){
-  cast<OverflowingCastOperator>(this)->setHasNoSignedWrap(b);
+  cast<WSXTOperator>(this)->setWasSext(b);
 }
 
 
@@ -184,7 +184,7 @@ bool Instruction::hasNoSignedWrap() const {
 }
 
 bool Instruction::canBeSext() const {
-  return cast<OverflowingCastOperator>(this)->hasNoSignedWrap();
+  return cast<WSXTOperator>(this)->wasSext();
 }
 
 bool Instruction::hasPoisonGeneratingFlags() const {
@@ -213,7 +213,7 @@ void Instruction::dropPoisonGeneratingFlags() {
     break;
   
   case Instruction::ZExt:
-    cast<OverflowingCastOperator>(this)->setHasNoSignedWrap(false);
+    cast<WSXTOperator>(this)->setWasSext(false);
     break;
   }
 

@@ -334,27 +334,26 @@ public:
 
 /// An utility class for the zext instructions that were
 /// created by a conversion from sext instructions.
-class OverflowingCastOperator : public Operator {
+class WSXTOperator : public Operator {
 public:
   enum {
-    NoSignedWrap   = 0 
+    WasSext   = 0 
   };
 
 private:
   friend class Instruction;
   friend class ConstantExpr;
 
-  void setHasNoSignedWrap(bool B) {
+  void setWasSext(bool B) {
     SubclassOptionalData =
-      (SubclassOptionalData & ~NoSignedWrap) | (B * NoSignedWrap);
+      (SubclassOptionalData & ~WasSext) | (B * WasSext);
   }
 
 public:
 
-  /// Test whether this operation is known to never
-  /// undergo signed overflow, aka the nsw property.
-  bool hasNoSignedWrap() const {
-    return (SubclassOptionalData & NoSignedWrap) != 0;
+  /// 
+  bool wasSext() const {
+    return (SubclassOptionalData & WasSext) != 0;
   }
   
   static bool classof(const Instruction *I) {
@@ -412,7 +411,7 @@ class LShrOperator
 };
 
 class ZExtOperator 
-  : public ConcreteOperator<OverflowingCastOperator, Instruction::ZExt> {
+  : public ConcreteOperator<WSXTOperator, Instruction::ZExt> {
 };
 
 class GEPOperator
