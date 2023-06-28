@@ -1582,6 +1582,7 @@ Expected<Value *> BitcodeReader::materializeValue(unsigned StartValID,
     if (Instruction::isCast(BC->Opcode)) {
       I = CastInst::Create((Instruction::CastOps)BC->Opcode, Ops[0],
                            BC->getType(), "constexpr", InsertBB);
+      
     } else if (Instruction::isUnaryOp(BC->Opcode)) {
       I = UnaryOperator::Create((Instruction::UnaryOps)BC->Opcode, Ops[0],
                                 "constexpr", InsertBB);

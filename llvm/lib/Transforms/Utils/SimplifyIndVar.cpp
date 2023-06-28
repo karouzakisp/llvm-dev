@@ -549,7 +549,7 @@ bool SimplifyIndvar::eliminateTrunc(TruncInst *TI) {
       assert(DoesZExtCollapse && "Unprofitable zext?");
       Ext = new ZExtInst(Op1, IVTy, "zext", ICI);
       Pred = ICmpInst::getUnsignedPredicate(Pred);
-      Ext->setCanBeSext(true);
+      Ext->setWasSext(true);
     } else {
       assert(DoesSExtCollapse && "Unprofitable sext?");
       Ext = new SExtInst(Op1, IVTy, "sext", ICI);

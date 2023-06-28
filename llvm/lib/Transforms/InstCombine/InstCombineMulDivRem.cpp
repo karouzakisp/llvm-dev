@@ -410,7 +410,7 @@ Instruction *InstCombinerImpl::visitMul(BinaryOperator &I) {
        (Op0->hasOneUse() || Op1->hasOneUse() || X == Y)) {
     Value *And = Builder.CreateAnd(X, Y, "mulbool");
     auto *ZExtInst = CastInst::Create(Instruction::ZExt, And, Ty);
-    ZExtInst->setCanBeSext(true);  
+    ZExtInst->setWasSext(true);  
     return ZExtInst;
    }
 

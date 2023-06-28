@@ -170,7 +170,7 @@ void Instruction::setIsExact(bool b) {
   cast<PossiblyExactOperator>(this)->setIsExact(b);
 }
 
-void Instruction::setCanBeSext(bool b){
+void Instruction::setWasSext(bool b){
   cast<WSXTOperator>(this)->setWasSext(b);
 }
 
@@ -183,7 +183,7 @@ bool Instruction::hasNoSignedWrap() const {
   return cast<OverflowingBinaryOperator>(this)->hasNoSignedWrap();
 }
 
-bool Instruction::canBeSext() const {
+bool Instruction::wasSext() const {
   return cast<WSXTOperator>(this)->wasSext();
 }
 

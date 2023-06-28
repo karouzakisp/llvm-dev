@@ -3740,9 +3740,15 @@ bool LLParser::parseValID(ValID &ID, PerFunctionState *PFS, Type *ExpectedTy) {
   case lltok::kw_inttoptr:
   case lltok::kw_ptrtoint: {
     unsigned Opc = Lex.getUIntVal();
+    unsigned ZextFlag = 0;
+    bool WasSext = false; 
     Type *DestTy = nullptr;
     Constant *SrcVal;
     Lex.Lex();
+    if(Opc == Instruction::ZExt ){
+      if (EatIfPresent(lltok::kw_was_sext))
+        WasSext = true;
+    }
     if (parseToken(lltok::lparen, "expected '(' after constantexpr cast") ||
         parseGlobalTypeAndValue(SrcVal) ||
         parseToken(lltok::kw_to, "expected 'to' in constantexpr cast") ||
@@ -3753,9 +3759,16 @@ bool LLParser::parseValID(ValID &ID, PerFunctionState *PFS, Type *ExpectedTy) {
       return error(ID.Loc, "invalid cast opcode for cast from '" +
                                getTypeString(SrcVal->getType()) + "' to '" +
                                getTypeString(DestTy) + "'");
-    ID.ConstantVal = ConstantExpr::getCast((Instruction::CastOps)Opc,
-                                                 SrcVal, DestTy);
+
     ID.Kind = ValID::t_Constant;
+    if(WasSext){
+      ID.ConstantVal = ConstantExpr::getZExt(SrcVal, DestTy, 
+          /* OnlyIfReduced */ false, /* WasSext */ true);
+      
+    }else { 
+      ID.ConstantVal = ConstantExpr::getCast((Instruction::CastOps)Opc,
+                                               SrcVal, DestTy);
+    }
     return false;
   }
   case lltok::kw_extractvalue:
@@ -6339,6 +6352,7 @@ int LLParser::parseInstruction(Instruction *&Inst, BasicBlock *BB,
 
     if (parseArithmetic(Inst, PFS, KeywordVal, /*IsFP*/ false))
       return true;
+
     if (Exact) cast<BinaryOperator>(Inst)->setIsExact(true);
     return false;
   }
@@ -6364,8 +6378,14 @@ int LLParser::parseInstruction(Instruction *&Inst, BasicBlock *BB,
   }
 
   // Casts.
+  case lltok::kw_zext: {
+    bool wasSext = EatIfPresent(lltok::kw_was_sext);
+    if (wasSext) 
+      cast<CastInst>(Inst)->setWasSext(true);
+     
+    return parseCast(Inst, PFS, KeywordVal);
+  }
   case lltok::kw_trunc:
-  case lltok::kw_zext:
   case lltok::kw_sext:
   case lltok::kw_fptrunc:
   case lltok::kw_fpext:
@@ -7147,6 +7167,7 @@ bool LLParser::parseCast(Instruction *&Inst, PerFunctionState &PFS,
   LocTy Loc;
   Value *Op;
   Type *DestTy = nullptr;
+  bool WasSext = Inst->wasSext();
   if (parseTypeAndValue(Op, Loc, PFS) ||
       parseToken(lltok::kw_to, "expected 'to' after cast value") ||
       parseType(DestTy))
@@ -7157,8 +7178,10 @@ bool LLParser::parseCast(Instruction *&Inst, PerFunctionState &PFS,
     return error(Loc, "invalid cast opcode for cast from '" +
                           getTypeString(Op->getType()) + "' to '" +
                           getTypeString(DestTy) + "'");
-  }
+  } 
   Inst = CastInst::Create((Instruction::CastOps)Opc, Op, DestTy);
+  if(WasSext == true && Opc == Instruction::ZExt)
+    Inst->setWasSext(WasSext);
   return false;
 }
 

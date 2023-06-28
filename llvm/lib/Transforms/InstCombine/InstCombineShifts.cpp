@@ -380,7 +380,7 @@ Instruction *InstCombinerImpl::commonShiftTransforms(BinaryOperator &I) {
   if (match(Op1, m_OneUse(m_SExt(m_Value(Y))))) {
     Value *NewExt = Builder.CreateZExt(Y, Ty, Op1->getName());
     if(auto *ZExtI = dyn_cast<ZExtInst>(NewExt))
-          ZExtI->setCanBeSext(true);
+          ZExtI->setWasSext(true);
     return BinaryOperator::Create(I.getOpcode(), Op0, NewExt);
   }
 
@@ -1267,11 +1267,7 @@ Instruction *InstCombinerImpl::visitLShr(BinaryOperator &I) {
         if (ShAmtC == BitWidth - 1) {
           Value *NewLShr = Builder.CreateLShr(X, SrcTyBitWidth - 1);
           auto *ZExt = new ZExtInst(NewLShr, Ty);
-<<<<<<< HEAD
-          ZExt->setCanBeSext(true);
-=======
-          ZExt->setCanBeSext(true); 
->>>>>>> 025011de21c14229c6c646fc7f2f6a46742929b1
+          ZExt->setWasSext(true);
           return ZExt;
         }
 

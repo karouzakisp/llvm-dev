@@ -142,7 +142,7 @@ static bool replaceSignedInst(SCCPSolver &Solver,
     if (InsertedValues.count(Op0) || !isNonNegative(Op0))
       return false;
     NewInst = new ZExtInst(Op0, Inst.getType(), "", &Inst);
-    NewInst->setCanBeSext(true);
+    NewInst->setWasSext(true);
     break;
   }
   case Instruction::AShr: {

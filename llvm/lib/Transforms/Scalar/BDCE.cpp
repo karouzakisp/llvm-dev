@@ -122,7 +122,7 @@ static bool bitTrackingDCE(Function &F, DemandedBits &DB) {
         Value *ZExt = Builder.CreateZExt(
                             SE->getOperand(0), DstTy, SE->getName());
         if(auto *ZExtI = dyn_cast<ZExtInst>(ZExt))
-          ZExtI->setCanBeSext(true);
+          ZExtI->setWasSext(true);
         I.replaceAllUsesWith(ZExt);
         Worklist.push_back(SE);
         Changed = true;

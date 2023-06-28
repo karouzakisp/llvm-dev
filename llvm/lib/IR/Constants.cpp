@@ -1953,7 +1953,7 @@ Value *NoCFIValue::handleOperandChangeImpl(Value *From, Value *To) {
 /// This is a utility function to handle folding of casts and lookup of the
 /// cast in the ExprConstants map. It is used by the various get* methods below.
 static Constant *getFoldedCast(Instruction::CastOps opc, Constant *C, Type *Ty,
-                               bool OnlyIfReduced = false) {
+                               bool OnlyIfReduced = false, bool WasSext = false) {
   assert(Ty->isFirstClassType() && "Cannot cast to an aggregate type!");
   // Fold a few common cases
   if (Constant *FC = ConstantFoldCastInstruction(opc, C, Ty))
@@ -1965,7 +1965,7 @@ static Constant *getFoldedCast(Instruction::CastOps opc, Constant *C, Type *Ty,
   LLVMContextImpl *pImpl = Ty->getContext().pImpl;
 
   // Look up the constant in the table first to ensure uniqueness.
-  ConstantExprKeyType Key(opc, C);
+  ConstantExprKeyType Key(opc, C, 0, WasSext);
 
   return pImpl->ExprConstants.getOrCreate(Ty, Key);
 }
@@ -2099,7 +2099,7 @@ Constant *ConstantExpr::getTrunc(Constant *C, Type *Ty, bool OnlyIfReduced) {
   assert(C->getType()->getScalarSizeInBits() > Ty->getScalarSizeInBits()&&
          "SrcTy must be larger than DestTy for Trunc!");
 
-  return getFoldedCast(Instruction::Trunc, C, Ty, OnlyIfReduced);
+  return getFoldedCast(Instruction::Trunc, C, Ty, OnlyIfReduced); 
 }
 
 Constant *ConstantExpr::getSExt(Constant *C, Type *Ty, bool OnlyIfReduced) {
@@ -2116,7 +2116,7 @@ Constant *ConstantExpr::getSExt(Constant *C, Type *Ty, bool OnlyIfReduced) {
   return getFoldedCast(Instruction::SExt, C, Ty, OnlyIfReduced);
 }
 
-Constant *ConstantExpr::getZExt(Constant *C, Type *Ty, bool OnlyIfReduced) {
+Constant *ConstantExpr::getZExt(Constant *C, Type *Ty, bool OnlyIfReduced, bool WasSext) {
 #ifndef NDEBUG
   bool fromVec = isa<VectorType>(C->getType());
   bool toVec = isa<VectorType>(Ty);
@@ -2127,7 +2127,7 @@ Constant *ConstantExpr::getZExt(Constant *C, Type *Ty, bool OnlyIfReduced) {
   assert(C->getType()->getScalarSizeInBits() < Ty->getScalarSizeInBits()&&
          "SrcTy must be smaller than DestTy for ZExt!");
 
-  return getFoldedCast(Instruction::ZExt, C, Ty, OnlyIfReduced);
+  return getFoldedCast(Instruction::ZExt, C, Ty, OnlyIfReduced, WasSext);
 }
 
 Constant *ConstantExpr::getFPTrunc(Constant *C, Type *Ty, bool OnlyIfReduced) {
@@ -2185,6 +2185,7 @@ Constant *ConstantExpr::getFPToUI(Constant *C, Type *Ty, bool OnlyIfReduced) {
   assert(C->getType()->isFPOrFPVectorTy() && Ty->isIntOrIntVectorTy() &&
          "This is an illegal floating point to uint cast!");
   return getFoldedCast(Instruction::FPToUI, C, Ty, OnlyIfReduced);
+                  
 }
 
 Constant *ConstantExpr::getFPToSI(Constant *C, Type *Ty, bool OnlyIfReduced) {
@@ -2210,6 +2211,7 @@ Constant *ConstantExpr::getPtrToInt(Constant *C, Type *DstTy,
                cast<VectorType>(DstTy)->getElementCount() &&
            "Invalid cast between a different number of vector elements");
   return getFoldedCast(Instruction::PtrToInt, C, DstTy, OnlyIfReduced);
+
 }
 
 Constant *ConstantExpr::getIntToPtr(Constant *C, Type *DstTy,
@@ -2258,6 +2260,7 @@ Constant *ConstantExpr::getAddrSpaceCast(Constant *C, Type *DstTy,
     C = getBitCast(C, MidTy);
   }
   return getFoldedCast(Instruction::AddrSpaceCast, C, DstTy, OnlyIfReduced);
+  
 }
 
 Constant *ConstantExpr::get(unsigned Opcode, Constant *C1, Constant *C2,

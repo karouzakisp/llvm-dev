@@ -100,7 +100,7 @@ bool RISCVCodeGenPrepare::visitZExtInst(ZExtInst &ZExt) {
   }
 
   // Look for zext instructions that can be sext.
-  if(ZExt.canBeSext() ){
+  if(ZExt.wasSext() ){
     auto SExt = new SExtInst(Src, ZExt.getType(), "", &ZExt);
     SExt->takeName(&ZExt);
     SExt->setDebugLoc(ZExt.getDebugLoc());

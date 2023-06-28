@@ -110,6 +110,7 @@ enum Kind {
   kw_nsw,
   kw_exact,
   kw_inbounds,
+  kw_was_sext,
   kw_inrange,
   kw_addrspace,
   kw_section,
