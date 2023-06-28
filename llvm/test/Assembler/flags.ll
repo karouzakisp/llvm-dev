@@ -260,10 +260,9 @@ define i64 @mul_unsigned_ce() {
 ; CHECK: ret i64 mul nuw (i64 ptrtoint (ptr @addr to i64), i64 91)
 	ret i64 mul nuw (i64 ptrtoint (ptr @addr to i64), i64 91)
 }
-
 define i64 @zext_after_add_signed(i32 %a, i32 %b) {
 ; CHECK: %sum = add nsw i32 %a, %b
-; CHECK: %res = zext was_sext i32 %sum to i64
+; CHECK: %res = zext i32 %sum to i64
   %sum = add nsw i32 %a, %b
   %res = zext was_sext i32 %sum to i64
   ret i64 %res
@@ -271,8 +270,9 @@ define i64 @zext_after_add_signed(i32 %a, i32 %b) {
 
 define i64 @zext_after_mul_signed(i32 %a, i32 %b) {
 ; CHECK: %mult = mul nsw i32 %a, %b
-; CHECK: %res = zext was_sext i32 %mult to i64
+; CHECK: %res = zext i32 %mult to i64
   %mult = mul nsw i32 %a, %b
   %res = zext was_sext i32 %mult to i64
   ret i64 %res
 }
+

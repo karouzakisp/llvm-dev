@@ -6379,11 +6379,13 @@ int LLParser::parseInstruction(Instruction *&Inst, BasicBlock *BB,
 
   // Casts.
   case lltok::kw_zext: {
-    bool wasSext = EatIfPresent(lltok::kw_was_sext);
-    if (wasSext) 
-      cast<CastInst>(Inst)->setWasSext(true);
-     
-    return parseCast(Inst, PFS, KeywordVal);
+    bool WasSext = EatIfPresent(lltok::kw_was_sext); 
+    bool Res = parseCast(Inst, PFS, KeywordVal);
+    if(Res != 0 && WasSext == true){
+      Inst->setWasSext(true);
+      return Res;
+    }
+    return 0;
   }
   case lltok::kw_trunc:
   case lltok::kw_sext:
@@ -7167,7 +7169,6 @@ bool LLParser::parseCast(Instruction *&Inst, PerFunctionState &PFS,
   LocTy Loc;
   Value *Op;
   Type *DestTy = nullptr;
-  bool WasSext = Inst->wasSext();
   if (parseTypeAndValue(Op, Loc, PFS) ||
       parseToken(lltok::kw_to, "expected 'to' after cast value") ||
       parseType(DestTy))
@@ -7180,8 +7181,6 @@ bool LLParser::parseCast(Instruction *&Inst, PerFunctionState &PFS,
                           getTypeString(DestTy) + "'");
   } 
   Inst = CastInst::Create((Instruction::CastOps)Opc, Op, DestTy);
-  if(WasSext == true && Opc == Instruction::ZExt)
-    Inst->setWasSext(WasSext);
   return false;
 }
 

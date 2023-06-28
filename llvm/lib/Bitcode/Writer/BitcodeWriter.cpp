@@ -101,9 +101,9 @@ extern FunctionSummary::ForceSummaryHotnessType ForceSummaryEdgesCold;
 
 namespace {
 
-/// These are manifest constants used by the bitcode writer. They do not need to
+/// These are manifest constants used by the bitcode writer. They do not need to // TODO add zext
 /// be kept in sync with the reader, but need to be consistent within this file.
-enum {
+enum { 
   // VALUE_SYMTAB_BLOCK abbrev id's.
   VST_ENTRY_8_ABBREV = bitc::FIRST_APPLICATION_ABBREV,
   VST_ENTRY_7_ABBREV,
@@ -1551,6 +1551,9 @@ static uint64_t getOptimizationFlags(const Value *V) {
       Flags |= bitc::AllowContract;
     if (FPMO->hasApproxFunc())
       Flags |= bitc::ApproxFunc;
+  } else if (const auto *WSXTO = dyn_cast<WSXTOperator>(V)) {
+    if(WSXTO->wasSext)
+      Flags |= bitc::WSXTO_WAS_SEXT;
   }
 
   return Flags;
@@ -3569,7 +3572,7 @@ void ModuleBitcodeWriter::writeBlockInfo() {
       llvm_unreachable("Unexpected abbrev ordering!");
   }
 
-  { // CE_CAST abbrev for CONSTANTS_BLOCK.
+  { // CE_CAST abbrev for CONSTANTS_BLOCK. TODO possible zext flag
     auto Abbv = std::make_shared<BitCodeAbbrev>();
     Abbv->Add(BitCodeAbbrevOp(bitc::CST_CODE_CE_CAST));
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 4));  // cast opc
@@ -3643,7 +3646,7 @@ void ModuleBitcodeWriter::writeBlockInfo() {
         FUNCTION_INST_BINOP_FLAGS_ABBREV)
       llvm_unreachable("Unexpected abbrev ordering!");
   }
-  { // INST_CAST abbrev for FUNCTION_BLOCK.
+  { // INST_CAST abbrev for FUNCTION_BLOCK. TODO possible zext flag
     auto Abbv = std::make_shared<BitCodeAbbrev>();
     Abbv->Add(BitCodeAbbrevOp(bitc::FUNC_CODE_INST_CAST));
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::VBR, 6));    // OpVal

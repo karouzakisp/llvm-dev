@@ -3211,7 +3211,7 @@ Error BitcodeReader::parseConstants() {
       }
       break;
     }
-    case bitc::CST_CODE_CE_CAST: {  // CE_CAST: [opcode, opty, opval]
+    case bitc::CST_CODE_CE_CAST: {  // CE_CAST: [opcode, opty, opval] #TODO
       if (Record.size() < 3)
         return error("Invalid cast constexpr record");
       int Opc = getDecodedCastOpcode(Record[0]);
@@ -4885,7 +4885,7 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       }
       break;
     }
-    case bitc::FUNC_CODE_INST_CAST: {    // CAST: [opval, opty, destty, castopc]
+    case bitc::FUNC_CODE_INST_CAST: {    // CAST: [opval, opty, destty, castopc] #TODO
       unsigned OpNum = 0;
       Value *Op;
       unsigned OpTypeID;

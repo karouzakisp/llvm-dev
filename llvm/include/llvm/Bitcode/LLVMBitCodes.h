@@ -505,6 +505,10 @@ enum FastMathMap {
   AllowReassoc    = (1 << 7)
 };
 
+/// WSXTOperatorOptionalFlags - Flags for serializing
+/// WSXTOperator's SubclassOptionalData contents.
+enum WSXTOperatorOptionalFlags { WSXTO_WAS_SEXT = 0 };
+
 /// PossiblyExactOperatorOptionalFlags - Flags for serializing
 /// PossiblyExactOperator's SubclassOptionalData contents.
 enum PossiblyExactOperatorOptionalFlags { PEO_EXACT = 0 };
