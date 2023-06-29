@@ -1345,7 +1345,7 @@ static void WriteOptimizationInfo(raw_ostream &Out, const User *U) {
       Out << " inbounds";
   } else if (const WSXTOperator *WSXTO = dyn_cast<WSXTOperator>(U)) {
     if (WSXTO->wasSext())
-      Out << " was_sext";
+      Out << " was_sext" ;
   }
   
 }
