@@ -1552,8 +1552,8 @@ static uint64_t getOptimizationFlags(const Value *V) {
     if (FPMO->hasApproxFunc())
       Flags |= bitc::ApproxFunc;
   } else if (const auto *WSXTO = dyn_cast<WSXTOperator>(V)) {
-    if(WSXTO->wasSext)
-      Flags |= bitc::WSXTO_WAS_SEXT;
+    if(WSXTO->wasSext())
+      Flags |= 1 << bitc::WSXTO_WAS_SEXT;
   }
 
   return Flags;
@@ -2650,6 +2650,9 @@ void ModuleBitcodeWriter::writeConstants(unsigned FirstVal, unsigned LastVal,
           Record.push_back(VE.getTypeID(C->getOperand(0)->getType()));
           Record.push_back(VE.getValueID(C->getOperand(0)));
           AbbrevToUse = CONSTANTS_CE_CAST_Abbrev;
+          uint64_t Flags = getOptimizationFlags(CE);
+          if (Flags != 0)
+            Record.push_back(Flags);
         } else {
           assert(CE->getNumOperands() == 2 && "Unknown constant expr!");
           Code = bitc::CST_CODE_CE_BINOP;
@@ -2836,6 +2839,12 @@ void ModuleBitcodeWriter::writeInstruction(const Instruction &I,
         AbbrevToUse = FUNCTION_INST_CAST_ABBREV;
       Vals.push_back(VE.getTypeID(I.getType()));
       Vals.push_back(getEncodedCastOpcode(I.getOpcode()));
+      uint64_t Flags = getOptimizationFlags(&I);
+      if (Flags != 0) {
+        if (AbbrevToUse == FUNCTION_INST_BINOP_ABBREV)
+          AbbrevToUse = FUNCTION_INST_BINOP_FLAGS_ABBREV;
+        Vals.push_back(Flags);
+      }
     } else {
       assert(isa<BinaryOperator>(I) && "Unknown instruction!");
       Code = bitc::FUNC_CODE_INST_BINOP;
@@ -3579,6 +3588,7 @@ void ModuleBitcodeWriter::writeBlockInfo() {
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed,       // typeid
                               VE.computeBitsRequiredForTypeIndicies()));
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::VBR, 8));    // value id
+    Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 8)); // flags
 
     if (Stream.EmitBlockInfoAbbrev(bitc::CONSTANTS_BLOCK_ID, Abbv) !=
         CONSTANTS_CE_CAST_Abbrev)
@@ -3653,6 +3663,7 @@ void ModuleBitcodeWriter::writeBlockInfo() {
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed,       // dest ty
                               VE.computeBitsRequiredForTypeIndicies()));
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 4));  // opc
+    Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 8)); // flags
     if (Stream.EmitBlockInfoAbbrev(bitc::FUNCTION_BLOCK_ID, Abbv) !=
         FUNCTION_INST_CAST_ABBREV)
       llvm_unreachable("Unexpected abbrev ordering!");

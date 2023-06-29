@@ -1469,7 +1469,7 @@ Expected<Value *> BitcodeReader::materializeValue(unsigned StartValID,
     // Materialize as constant expression if possible.
     if (isConstExprSupported(BC->Opcode) && ConstOps.size() == Ops.size()) {
       Constant *C;
-      if (Instruction::isCast(BC->Opcode)) {
+      if (Instruction::isCast(BC->Opcode)) { // TODO 
         C = UpgradeBitCastExpr(BC->Opcode, ConstOps[0], BC->getType());
         if (!C)
           C = ConstantExpr::getCast(BC->Opcode, ConstOps[0], BC->getType());
@@ -1582,6 +1582,8 @@ Expected<Value *> BitcodeReader::materializeValue(unsigned StartValID,
     if (Instruction::isCast(BC->Opcode)) {
       I = CastInst::Create((Instruction::CastOps)BC->Opcode, Ops[0],
                            BC->getType(), "constexpr", InsertBB);
+      if(isa<WSXTOperator>(I) && (BC->flags & WSXTOperator::WasSext))
+        I->setWasSext(true);
       
     } else if (Instruction::isUnaryOp(BC->Opcode)) {
       I = UnaryOperator::Create((Instruction::UnaryOps)BC->Opcode, Ops[0],

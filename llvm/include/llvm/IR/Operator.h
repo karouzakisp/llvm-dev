@@ -337,7 +337,7 @@ public:
 class WSXTOperator : public Operator {
 public:
   enum {
-    WasSext   = 0 
+    WasSext = (1 << 0) 
   };
 
 private:
