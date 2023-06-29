@@ -3220,11 +3220,15 @@ Error BitcodeReader::parseConstants() {
       if (Opc < 0) {
         V = UndefValue::get(CurTy);  // Unknown cast.
       } else {
+        uint8_t Flags = 0;
+        if(Record[3] & (1 << bitc::WSXTO_WAS_SEXT ))
+          Flags |= WSXTOperator::WasSext;
         unsigned OpTyID = Record[1];
         Type *OpTy = getTypeByID(OpTyID);
         if (!OpTy)
           return error("Invalid cast constexpr record");
-        V = BitcodeConstant::create(Alloc, CurTy, Opc, (unsigned)Record[2]);
+        V = BitcodeConstant::create(Alloc, CurTy, Opc, Flags,  
+                                    (unsigned)Record[2]);
       }
       break;
     }
@@ -4913,6 +4917,10 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
           return error("Invalid cast");
         I = CastInst::Create(CastOp, Op, ResTy);
       }
+      if(Opc == Instruction::ZExt && 
+        (Record[OpNum] & 1 << bitc::WSXTO_WAS_SEXT ))
+        cast<CastInst>(I)->setWasSext(true); 
+      
       InstructionList.push_back(I);
       break;
     }
@@ -6404,8 +6412,8 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       if (Error Err = propagateAttributeTypes(cast<CallBase>(I), ArgTyIDs)) {
         I->deleteValue();
         return Err;
-      }
-      if (FMF.any()) {
+      }   // CHECK FOR ZEXT FLAG possible on call?
+      if (FMF.any()) { 
         if (!isa<FPMathOperator>(I))
           return error("Fast-math-flags specified for call without "
                        "floating-point scalar or vector return type");
