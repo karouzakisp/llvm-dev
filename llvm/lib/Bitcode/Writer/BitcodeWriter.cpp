@@ -3666,7 +3666,7 @@ void ModuleBitcodeWriter::writeBlockInfo() {
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 4));  // opc
     Abbv->Add(BitCodeAbbrevOp(BitCodeAbbrevOp::Fixed, 8)); // flags
     if (Stream.EmitBlockInfoAbbrev(bitc::FUNCTION_BLOCK_ID, Abbv) !=
-        FUNCTION_INST_CAST_ABBREV)
+        FUNCTION_INST_CAST_FLAGS_ABBREV)
       llvm_unreachable("Unexpected abbrev ordering!");
   }
 
