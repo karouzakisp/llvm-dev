@@ -123,6 +123,7 @@ enum {
   FUNCTION_INST_BINOP_ABBREV,
   FUNCTION_INST_BINOP_FLAGS_ABBREV,
   FUNCTION_INST_CAST_ABBREV,
+  FUNCTION_INST_CAST_FLAGS_ABBREV,
   FUNCTION_INST_RET_VOID_ABBREV,
   FUNCTION_INST_RET_VAL_ABBREV,
   FUNCTION_INST_UNREACHABLE_ABBREV,
@@ -2841,8 +2842,8 @@ void ModuleBitcodeWriter::writeInstruction(const Instruction &I,
       Vals.push_back(getEncodedCastOpcode(I.getOpcode()));
       uint64_t Flags = getOptimizationFlags(&I);
       if (Flags != 0) {
-        if (AbbrevToUse == FUNCTION_INST_BINOP_ABBREV)
-          AbbrevToUse = FUNCTION_INST_BINOP_FLAGS_ABBREV;
+        if (AbbrevToUse == FUNCTION_INST_CAST_ABBREV)
+          AbbrevToUse = FUNCTION_INST_CAST_FLAGS_ABBREV;
         Vals.push_back(Flags);
       }
     } else {

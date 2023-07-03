@@ -1582,7 +1582,7 @@ Expected<Value *> BitcodeReader::materializeValue(unsigned StartValID,
     if (Instruction::isCast(BC->Opcode)) {
       I = CastInst::Create((Instruction::CastOps)BC->Opcode, Ops[0],
                            BC->getType(), "constexpr", InsertBB);
-      if(isa<WSXTOperator>(I) && (BC->flags & WSXTOperator::WasSext))
+      if(isa<WSXTOperator>(I) && (BC->Flags & WSXTOperator::WasSext))
         I->setWasSext(true);
       
     } else if (Instruction::isUnaryOp(BC->Opcode)) {
@@ -3227,7 +3227,7 @@ Error BitcodeReader::parseConstants() {
         Type *OpTy = getTypeByID(OpTyID);
         if (!OpTy)
           return error("Invalid cast constexpr record");
-        V = BitcodeConstant::create(Alloc, CurTy, Opc, Flags,  
+        V = BitcodeConstant::create(Alloc, CurTy, {(uint8_t) Opc, Flags},  
                                     (unsigned)Record[2]);
       }
       break;
