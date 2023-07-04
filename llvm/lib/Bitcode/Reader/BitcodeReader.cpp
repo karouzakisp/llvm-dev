@@ -3221,8 +3221,10 @@ Error BitcodeReader::parseConstants() {
         V = UndefValue::get(CurTy);  // Unknown cast.
       } else {
         uint8_t Flags = 0;
-        if(Record[3] & (1 << bitc::WSXTO_WAS_SEXT ))
-          Flags |= WSXTOperator::WasSext;
+        if(Record.size() >= 4){
+          if(Record[3] & (1 << bitc::WSXTO_WAS_SEXT ))
+            Flags |= WSXTOperator::WasSext;
+        }
         unsigned OpTyID = Record[1];
         Type *OpTy = getTypeByID(OpTyID);
         if (!OpTy)

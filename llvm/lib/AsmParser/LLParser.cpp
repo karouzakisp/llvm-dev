@@ -6381,10 +6381,11 @@ int LLParser::parseInstruction(Instruction *&Inst, BasicBlock *BB,
   case lltok::kw_zext: {
     bool WasSext = EatIfPresent(lltok::kw_was_sext); 
     bool Res = parseCast(Inst, PFS, KeywordVal);
-    if(Res != 0 && WasSext == true){
-      Inst->setWasSext(true);
+    if(Res != 0 ){
       return Res;
     }
+    if(WasSext == true)
+      Inst->setWasSext(true);
     return 0;
   }
   case lltok::kw_trunc:

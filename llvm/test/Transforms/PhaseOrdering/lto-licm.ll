@@ -10,7 +10,7 @@ define void @hoist_fdiv(ptr %a, float %b) {
 ; CHECK-NEXT:    [[CMP_NOT:%.*]] = icmp eq i32 [[I_0]], 1024
 ; CHECK-NEXT:    br i1 [[CMP_NOT]], label [[FOR_END:%.*]], label [[FOR_INC]]
 ; CHECK:       for.inc:
-; CHECK-NEXT:    [[IDXPROM:%.*]] = zext i32 [[I_0]] to i64
+; CHECK-NEXT:    [[IDXPROM:%.*]] = zext was_sext i32 [[I_0]] to i64
 ; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[IDXPROM]]
 ; CHECK-NEXT:    [[TMP0:%.*]] = load float, ptr [[ARRAYIDX]], align 4
 ; CHECK-NEXT:    [[TMP1:%.*]] = fdiv fast float [[TMP0]], [[B:%.*]]

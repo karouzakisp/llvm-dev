@@ -114,7 +114,7 @@ enum {
   CONSTANTS_SETTYPE_ABBREV = bitc::FIRST_APPLICATION_ABBREV,
   CONSTANTS_INTEGER_ABBREV,
   CONSTANTS_CE_CAST_Abbrev,
-  CONSTANTS_CE_CAST_FLAGS_ABBREV
+  CONSTANTS_CE_CAST_FLAGS_ABBREV,
   CONSTANTS_NULL_Abbrev,
 
   // FUNCTION_BLOCK abbrev id's.
@@ -2651,10 +2651,10 @@ void ModuleBitcodeWriter::writeConstants(unsigned FirstVal, unsigned LastVal,
           Record.push_back(getEncodedCastOpcode(CE->getOpcode()));
           Record.push_back(VE.getTypeID(C->getOperand(0)->getType()));
           Record.push_back(VE.getValueID(C->getOperand(0)));
-          AbbrevToUse = CONSTANTS_CE_CAST_Abbrev 
+          AbbrevToUse = CONSTANTS_CE_CAST_Abbrev; 
           uint64_t Flags = getOptimizationFlags(CE);
           if (Flags != 0){
-            AbbrevToUse = CONSTANTS_CE_CAST_FLAGS_ABBREV
+            AbbrevToUse = CONSTANTS_CE_CAST_FLAGS_ABBREV;
             Record.push_back(Flags);
           }
         } else {
