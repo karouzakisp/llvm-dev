@@ -520,7 +520,7 @@ define i16 @ashr_convert(i16 %x, i16 %y) {
 
 define i32 @sext_convert(i16 %x) {
 ; CHECK-LABEL: @sext_convert(
-; CHECK-NEXT:    [[EXT:%.*]] = zext i16 [[X:%.*]] to i32
+; CHECK-NEXT:    [[EXT:%.*]] = zext was_sext i16 [[X:%.*]] to i32
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp sge i16 [[X]], 0
 ; CHECK-NEXT:    [[SEL:%.*]] = select i1 [[CMP]], i32 [[EXT]], i32 24
 ; CHECK-NEXT:    ret i32 [[SEL]]

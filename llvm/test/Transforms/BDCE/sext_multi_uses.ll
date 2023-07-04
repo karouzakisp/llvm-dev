@@ -3,7 +3,7 @@
 define i32 @ZEXT_0(i16 %a) {
 ; CHECK-LABEL: @ZEXT_0(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[EXT1:%.*]] = zext i16 [[A:%.*]] to i32
+; CHECK-NEXT:    [[EXT1:%.*]] = zext was_sext i16 [[A:%.*]] to i32
 ; CHECK-NEXT:    [[AND:%.*]] = and i32 [[EXT1]], 65280
 ; CHECK-NEXT:    [[LSR:%.*]] = lshr i32 [[EXT1]], 8
 ; CHECK-NEXT:    [[AND2:%.*]] = and i32 [[LSR]], 255
@@ -22,7 +22,7 @@ entry:
 define i32 @ZEXT_1(i16 %a) {
 ; CHECK-LABEL: @ZEXT_1(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[EXT1:%.*]] = zext i16 [[A:%.*]] to i32
+; CHECK-NEXT:    [[EXT1:%.*]] = zext was_sext i16 [[A:%.*]] to i32
 ; CHECK-NEXT:    [[LSR:%.*]] = lshr i32 [[EXT1]], 8
 ; CHECK-NEXT:    [[AND2:%.*]] = and i32 [[LSR]], 255
 ; CHECK-NEXT:    [[AND:%.*]] = or i32 [[EXT1]], -65536
@@ -99,7 +99,7 @@ entry:
 
 define i16 @clear_assumptions(i8 %x, i16 %y) {
 ; CHECK-LABEL: @clear_assumptions(
-; CHECK-NEXT:    [[EXT1:%.*]] = zext i8 [[X:%.*]] to i16
+; CHECK-NEXT:    [[EXT1:%.*]] = zext was_sext i8 [[X:%.*]] to i16
 ; CHECK-NEXT:    [[ADD:%.*]] = add i16 [[EXT1]], [[Y:%.*]]
 ; CHECK-NEXT:    [[AND:%.*]] = and i16 [[ADD]], 255
 ; CHECK-NEXT:    ret i16 [[AND]]

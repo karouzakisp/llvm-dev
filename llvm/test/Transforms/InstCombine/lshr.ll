@@ -290,7 +290,7 @@ define <2 x i8> @smear_sign_and_widen_splat(<2 x i6> %x) {
 define i18 @fake_sext(i3 %x) {
 ; CHECK-LABEL: @fake_sext(
 ; CHECK-NEXT:    [[TMP1:%.*]] = lshr i3 [[X:%.*]], 2
-; CHECK-NEXT:    [[SH:%.*]] = zext i3 [[TMP1]] to i18
+; CHECK-NEXT:    [[SH:%.*]] = zext was_sext i3 [[TMP1]] to i18
 ; CHECK-NEXT:    ret i18 [[SH]]
 ;
   %sext = sext i3 %x to i18
@@ -314,7 +314,7 @@ define i32 @fake_sext_but_should_not_change_type(i3 %x) {
 define <2 x i8> @fake_sext_splat(<2 x i3> %x) {
 ; CHECK-LABEL: @fake_sext_splat(
 ; CHECK-NEXT:    [[TMP1:%.*]] = lshr <2 x i3> [[X:%.*]], <i3 2, i3 2>
-; CHECK-NEXT:    [[SH:%.*]] = zext <2 x i3> [[TMP1]] to <2 x i8>
+; CHECK-NEXT:    [[SH:%.*]] = zext was_sext <2 x i3> [[TMP1]] to <2 x i8>
 ; CHECK-NEXT:    ret <2 x i8> [[SH]]
 ;
   %sext = sext <2 x i3> %x to <2 x i8>

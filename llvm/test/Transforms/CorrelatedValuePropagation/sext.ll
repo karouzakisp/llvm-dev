@@ -18,12 +18,31 @@ define void @test1(i32 %n) {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[A]], -1
 ; CHECK-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]]
 ; CHECK:       for.body:
-; CHECK-NEXT:    [[EXT_WIDE1:%.*]] = zext i32 [[A]] to i64
-; CHECK-NEXT:    call void @use64(i64 [[EXT_WIDE1]])
-; CHECK-NEXT:    [[EXT]] = trunc i64 [[EXT_WIDE1]] to i32
+; CHECK-NEXT:    [[EXT_WIDE:%.*]] = zext was_sext i32 [[A]] to i64
+; CHECK-NEXT:    call void @use64(i64 [[EXT_WIDE]])
+; CHECK-NEXT:    [[EXT]] = trunc i64 [[EXT_WIDE]] to i32
 ; CHECK-NEXT:    br label [[FOR_COND]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
+;
+; DEBUG-LABEL: @test1(
+; DEBUG-NEXT:  entry:
+; DEBUG-NEXT:    br label [[FOR_COND:%.*]], !dbg [[DBG16:![0-9]+]]
+; DEBUG:       for.cond:
+; DEBUG-NEXT:    [[A:%.*]] = phi i32 [ [[N:%.*]], [[ENTRY:%.*]] ], [ [[EXT:%.*]], [[FOR_BODY:%.*]] ], !dbg [[DBG17:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[A]], metadata [[META9:![0-9]+]], metadata !DIExpression()), !dbg [[DBG17]]
+; DEBUG-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[A]], -1, !dbg [[DBG18:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i1 [[CMP]], metadata [[META11:![0-9]+]], metadata !DIExpression()), !dbg [[DBG18]]
+; DEBUG-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]], !dbg [[DBG19:![0-9]+]]
+; DEBUG:       for.body:
+; DEBUG-NEXT:    [[EXT_WIDE:%.*]] = zext was_sext i32 [[A]] to i64, !dbg [[DBG20:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i64 [[EXT_WIDE]], metadata [[META13:![0-9]+]], metadata !DIExpression()), !dbg [[DBG20]]
+; DEBUG-NEXT:    call void @use64(i64 [[EXT_WIDE]]), !dbg [[DBG21:![0-9]+]]
+; DEBUG-NEXT:    [[EXT]] = trunc i64 [[EXT_WIDE]] to i32, !dbg [[DBG22:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[EXT]], metadata [[META15:![0-9]+]], metadata !DIExpression()), !dbg [[DBG22]]
+; DEBUG-NEXT:    br label [[FOR_COND]], !dbg [[DBG23:![0-9]+]]
+; DEBUG:       for.end:
+; DEBUG-NEXT:    ret void, !dbg [[DBG24:![0-9]+]]
 ;
 entry:
   br label %for.cond
@@ -60,6 +79,25 @@ define void @test2(i32 %n) {
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
 ;
+; DEBUG-LABEL: @test2(
+; DEBUG-NEXT:  entry:
+; DEBUG-NEXT:    br label [[FOR_COND:%.*]], !dbg [[DBG31:![0-9]+]]
+; DEBUG:       for.cond:
+; DEBUG-NEXT:    [[A:%.*]] = phi i32 [ [[N:%.*]], [[ENTRY:%.*]] ], [ [[EXT:%.*]], [[FOR_BODY:%.*]] ], !dbg [[DBG32:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[A]], metadata [[META27:![0-9]+]], metadata !DIExpression()), !dbg [[DBG32]]
+; DEBUG-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[A]], -2, !dbg [[DBG33:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i1 [[CMP]], metadata [[META28:![0-9]+]], metadata !DIExpression()), !dbg [[DBG33]]
+; DEBUG-NEXT:    br i1 [[CMP]], label [[FOR_BODY]], label [[FOR_END:%.*]], !dbg [[DBG34:![0-9]+]]
+; DEBUG:       for.body:
+; DEBUG-NEXT:    [[EXT_WIDE:%.*]] = sext i32 [[A]] to i64, !dbg [[DBG35:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i64 [[EXT_WIDE]], metadata [[META29:![0-9]+]], metadata !DIExpression()), !dbg [[DBG35]]
+; DEBUG-NEXT:    call void @use64(i64 [[EXT_WIDE]]), !dbg [[DBG36:![0-9]+]]
+; DEBUG-NEXT:    [[EXT]] = trunc i64 [[EXT_WIDE]] to i32, !dbg [[DBG37:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[EXT]], metadata [[META30:![0-9]+]], metadata !DIExpression()), !dbg [[DBG37]]
+; DEBUG-NEXT:    br label [[FOR_COND]], !dbg [[DBG38:![0-9]+]]
+; DEBUG:       for.end:
+; DEBUG-NEXT:    ret void, !dbg [[DBG39:![0-9]+]]
+;
 entry:
   br label %for.cond
 
@@ -85,12 +123,27 @@ define void @test3(i32 %n) {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[N:%.*]], -1
 ; CHECK-NEXT:    br i1 [[CMP]], label [[BB:%.*]], label [[EXIT:%.*]]
 ; CHECK:       bb:
-; CHECK-NEXT:    [[EXT_WIDE1:%.*]] = zext i32 [[N]] to i64
-; CHECK-NEXT:    call void @use64(i64 [[EXT_WIDE1]])
-; CHECK-NEXT:    [[EXT:%.*]] = trunc i64 [[EXT_WIDE1]] to i32
+; CHECK-NEXT:    [[EXT_WIDE:%.*]] = zext was_sext i32 [[N]] to i64
+; CHECK-NEXT:    call void @use64(i64 [[EXT_WIDE]])
+; CHECK-NEXT:    [[EXT:%.*]] = trunc i64 [[EXT_WIDE]] to i32
 ; CHECK-NEXT:    br label [[EXIT]]
 ; CHECK:       exit:
 ; CHECK-NEXT:    ret void
+;
+; DEBUG-LABEL: @test3(
+; DEBUG-NEXT:  entry:
+; DEBUG-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[N:%.*]], -1, !dbg [[DBG45:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i1 [[CMP]], metadata [[META42:![0-9]+]], metadata !DIExpression()), !dbg [[DBG45]]
+; DEBUG-NEXT:    br i1 [[CMP]], label [[BB:%.*]], label [[EXIT:%.*]], !dbg [[DBG46:![0-9]+]]
+; DEBUG:       bb:
+; DEBUG-NEXT:    [[EXT_WIDE:%.*]] = zext was_sext i32 [[N]] to i64, !dbg [[DBG47:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i64 [[EXT_WIDE]], metadata [[META43:![0-9]+]], metadata !DIExpression()), !dbg [[DBG47]]
+; DEBUG-NEXT:    call void @use64(i64 [[EXT_WIDE]]), !dbg [[DBG48:![0-9]+]]
+; DEBUG-NEXT:    [[EXT:%.*]] = trunc i64 [[EXT_WIDE]] to i32, !dbg [[DBG49:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[EXT]], metadata [[META44:![0-9]+]], metadata !DIExpression()), !dbg [[DBG49]]
+; DEBUG-NEXT:    br label [[EXIT]], !dbg [[DBG50:![0-9]+]]
+; DEBUG:       exit:
+; DEBUG-NEXT:    ret void, !dbg [[DBG51:![0-9]+]]
 ;
 entry:
   %cmp = icmp sgt i32 %n, -1
@@ -119,6 +172,21 @@ define void @test4(i32 %n) {
 ; CHECK-NEXT:    br label [[EXIT]]
 ; CHECK:       exit:
 ; CHECK-NEXT:    ret void
+;
+; DEBUG-LABEL: @test4(
+; DEBUG-NEXT:  entry:
+; DEBUG-NEXT:    [[CMP:%.*]] = icmp sgt i32 [[N:%.*]], -2, !dbg [[DBG57:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i1 [[CMP]], metadata [[META54:![0-9]+]], metadata !DIExpression()), !dbg [[DBG57]]
+; DEBUG-NEXT:    br i1 [[CMP]], label [[BB:%.*]], label [[EXIT:%.*]], !dbg [[DBG58:![0-9]+]]
+; DEBUG:       bb:
+; DEBUG-NEXT:    [[EXT_WIDE:%.*]] = sext i32 [[N]] to i64, !dbg [[DBG59:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i64 [[EXT_WIDE]], metadata [[META55:![0-9]+]], metadata !DIExpression()), !dbg [[DBG59]]
+; DEBUG-NEXT:    call void @use64(i64 [[EXT_WIDE]]), !dbg [[DBG60:![0-9]+]]
+; DEBUG-NEXT:    [[EXT:%.*]] = trunc i64 [[EXT_WIDE]] to i32, !dbg [[DBG61:![0-9]+]]
+; DEBUG-NEXT:    call void @llvm.dbg.value(metadata i32 [[EXT]], metadata [[META56:![0-9]+]], metadata !DIExpression()), !dbg [[DBG61]]
+; DEBUG-NEXT:    br label [[EXIT]], !dbg [[DBG62:![0-9]+]]
+; DEBUG:       exit:
+; DEBUG-NEXT:    ret void, !dbg [[DBG63:![0-9]+]]
 ;
 entry:
   %cmp = icmp sgt i32 %n, -2
