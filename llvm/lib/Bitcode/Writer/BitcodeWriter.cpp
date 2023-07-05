@@ -1556,10 +1556,9 @@ static uint64_t getOptimizationFlags(const Value *V) {
   } else if (const auto *WSXTO = dyn_cast<WSXTOperator>(V)) {
     if(WSXTO->wasSext()){
       Flags |= 1 << bitc::WSXTO_WAS_SEXT;
-      errs() << "Inside get opt flags = " << Flags << "\n";
+      assert(Flags == 1);
     }
   }
-
   return Flags;
 }
 
