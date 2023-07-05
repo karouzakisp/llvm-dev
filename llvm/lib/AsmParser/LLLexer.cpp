@@ -564,6 +564,7 @@ lltok::Kind LLLexer::LexIdentifier() {
   KEYWORD(fast);
   KEYWORD(nuw);
   KEYWORD(nsw);
+  KEYWORD(was_sext);
   KEYWORD(exact);
   KEYWORD(inbounds);
   KEYWORD(inrange);

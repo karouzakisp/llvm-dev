@@ -1554,8 +1554,10 @@ static uint64_t getOptimizationFlags(const Value *V) {
     if (FPMO->hasApproxFunc())
       Flags |= bitc::ApproxFunc;
   } else if (const auto *WSXTO = dyn_cast<WSXTOperator>(V)) {
-    if(WSXTO->wasSext())
+    if(WSXTO->wasSext()){
+      errs() << "Inside get opt flags" << "\n";
       Flags |= 1 << bitc::WSXTO_WAS_SEXT;
+    }
   }
 
   return Flags;
@@ -2654,6 +2656,7 @@ void ModuleBitcodeWriter::writeConstants(unsigned FirstVal, unsigned LastVal,
           AbbrevToUse = CONSTANTS_CE_CAST_Abbrev; 
           uint64_t Flags = getOptimizationFlags(CE);
           if (Flags != 0){
+            errs() << "Writing flag..." << "\n";
             AbbrevToUse = CONSTANTS_CE_CAST_FLAGS_ABBREV;
             Record.push_back(Flags);
           }

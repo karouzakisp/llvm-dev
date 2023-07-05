@@ -4898,7 +4898,7 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       Value *Op;
       unsigned OpTypeID;
       if (getValueTypePair(Record, OpNum, NextValueNo, Op, OpTypeID, CurBB) ||
-          OpNum+2 != Record.size())
+          OpNum+1 > Record.size())
         return error("Invalid record");
 
       ResTypeID = Record[OpNum];
@@ -4920,8 +4920,8 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
         I = CastInst::Create(CastOp, Op, ResTy);
       }
       if(Opc == Instruction::ZExt && 
-        (Record[OpNum] & 1 << bitc::WSXTO_WAS_SEXT ))
-        cast<CastInst>(I)->setWasSext(true); 
+        (Record[OpNum] & (1 << bitc::WSXTO_WAS_SEXT )))
+          cast<CastInst>(I)->setWasSext(true); 
       
       InstructionList.push_back(I);
       break;
