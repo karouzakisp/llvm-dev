@@ -2655,8 +2655,9 @@ void ModuleBitcodeWriter::writeConstants(unsigned FirstVal, unsigned LastVal,
           Record.push_back(VE.getValueID(C->getOperand(0)));
           AbbrevToUse = CONSTANTS_CE_CAST_Abbrev; 
           uint64_t Flags = getOptimizationFlags(CE);
+          assert(Flags != 0 && "Invalid flags");
           if (Flags != 0){
-            errs() << "Writing flag..." << "\n";
+            
             AbbrevToUse = CONSTANTS_CE_CAST_FLAGS_ABBREV;
             Record.push_back(Flags);
           }
