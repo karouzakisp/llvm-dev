@@ -1556,7 +1556,6 @@ static uint64_t getOptimizationFlags(const Value *V) {
   } else if (const auto *WSXTO = dyn_cast<WSXTOperator>(V)) {
     if(WSXTO->wasSext()){
       Flags |= 1 << bitc::WSXTO_WAS_SEXT;
-      assert(Flags == 1);
     }
   }
   return Flags;
@@ -2654,8 +2653,7 @@ void ModuleBitcodeWriter::writeConstants(unsigned FirstVal, unsigned LastVal,
           Record.push_back(VE.getValueID(C->getOperand(0)));
           AbbrevToUse = CONSTANTS_CE_CAST_Abbrev; 
           uint64_t Flags = getOptimizationFlags(CE);
-          if (Flags != 0){
-            assert(Flags != 1 && "Invalid flags");
+        if (Flags != 0){
             AbbrevToUse = CONSTANTS_CE_CAST_FLAGS_ABBREV;
             Record.push_back(Flags);
           }

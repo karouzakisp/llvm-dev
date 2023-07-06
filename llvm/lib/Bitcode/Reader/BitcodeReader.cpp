@@ -3222,8 +3222,9 @@ Error BitcodeReader::parseConstants() {
       } else {
         uint8_t Flags = 0;
         if(Record.size() >= 4){
-          if(Record[3] & (1 << bitc::WSXTO_WAS_SEXT ))
+          if(Record[3] & (1 << bitc::WSXTO_WAS_SEXT )){
             Flags |= WSXTOperator::WasSext;
+          }
         }
         unsigned OpTyID = Record[1];
         Type *OpTy = getTypeByID(OpTyID);
@@ -4874,11 +4875,11 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
             Opc == Instruction::Sub ||
             Opc == Instruction::Mul ||
             Opc == Instruction::Shl) {
-          if (Record[OpNum] & (1 << bitc::OBO_NO_SIGNED_WRAP))
-            cast<BinaryOperator>(I)->setHasNoSignedWrap(true);
           if (Record[OpNum] & (1 << bitc::OBO_NO_UNSIGNED_WRAP))
             cast<BinaryOperator>(I)->setHasNoUnsignedWrap(true);
-        } else if (Opc == Instruction::SDiv ||
+          if (Record[OpNum] & (1 << bitc::OBO_NO_SIGNED_WRAP)) 
+            cast<BinaryOperator>(I)->setHasNoSignedWrap(true);
+          } else if (Opc == Instruction::SDiv ||
                    Opc == Instruction::UDiv ||
                    Opc == Instruction::LShr ||
                    Opc == Instruction::AShr) {
@@ -4900,10 +4901,17 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
       if (getValueTypePair(Record, OpNum, NextValueNo, Op, OpTypeID, CurBB) ||
           OpNum+1 > Record.size())
         return error("Invalid record");
+          
+
 
       ResTypeID = Record[OpNum];
       Type *ResTy = getTypeByID(ResTypeID);
-      int Opc = getDecodedCastOpcode(Record[OpNum + 1]);
+      int Opc;
+      if(Record.size() >= 4)
+        Opc = getDecodedCastOpcode(Record[++OpNum]);
+      else
+        Opc = getDecodedCastOpcode(Record[OpNum+1]);
+      
       if (Opc == -1 || !ResTy)
         return error("Invalid record");
       Instruction *Temp = nullptr;
@@ -4915,13 +4923,16 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
         }
       } else {
         auto CastOp = (Instruction::CastOps)Opc;
+        
         if (!CastInst::castIsValid(CastOp, Op, ResTy))
           return error("Invalid cast");
         I = CastInst::Create(CastOp, Op, ResTy);
       }
-      if(Opc == Instruction::ZExt && 
-        (Record[OpNum] & (1 << bitc::WSXTO_WAS_SEXT )))
+      if(isa<WSXTOperator>(I) ){ 
+        if((Record[OpNum] & (1 << bitc::WSXTO_WAS_SEXT ))){
           cast<CastInst>(I)->setWasSext(true); 
+        }
+      }
       
       InstructionList.push_back(I);
       break;

@@ -3755,19 +3755,24 @@ CastInst::castIsValid(Instruction::CastOps op, Type *SrcTy, Type *DstTy) {
                                 : ElementCount::getFixed(0);
   ElementCount DstEC = DstIsVec ? cast<VectorType>(DstTy)->getElementCount()
                                 : ElementCount::getFixed(0);
-
+  
+  
   // Switch on the opcode provided
   switch (op) {
-  default: return false; // This is an input error
+  default: {
+    return false; // This is an input error
+  }
   case Instruction::Trunc:
     return SrcTy->isIntOrIntVectorTy() && DstTy->isIntOrIntVectorTy() &&
            SrcEC == DstEC && SrcScalarBitSize > DstScalarBitSize;
-  case Instruction::ZExt:
+  case Instruction::ZExt:{
     return SrcTy->isIntOrIntVectorTy() && DstTy->isIntOrIntVectorTy() &&
            SrcEC == DstEC && SrcScalarBitSize < DstScalarBitSize;
-  case Instruction::SExt:
+  }
+  case Instruction::SExt:{
     return SrcTy->isIntOrIntVectorTy() && DstTy->isIntOrIntVectorTy() &&
            SrcEC == DstEC && SrcScalarBitSize < DstScalarBitSize;
+  }
   case Instruction::FPTrunc:
     return SrcTy->isFPOrFPVectorTy() && DstTy->isFPOrFPVectorTy() &&
            SrcEC == DstEC && SrcScalarBitSize > DstScalarBitSize;
