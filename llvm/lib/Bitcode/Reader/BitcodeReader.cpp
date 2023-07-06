@@ -4904,13 +4904,9 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
           
 
 
-      ResTypeID = Record[OpNum];
+      ResTypeID = Record[OpNum++];
       Type *ResTy = getTypeByID(ResTypeID);
-      int Opc;
-      if(Record.size() >= 4)
-        Opc = getDecodedCastOpcode(Record[++OpNum]);
-      else
-        Opc = getDecodedCastOpcode(Record[OpNum+1]);
+      int Opc = getDecodedCastOpcode(Record[OpNum++]);
       
       if (Opc == -1 || !ResTy)
         return error("Invalid record");
@@ -4928,9 +4924,11 @@ Error BitcodeReader::parseFunctionBody(Function *F) {
           return error("Invalid cast");
         I = CastInst::Create(CastOp, Op, ResTy);
       }
-      if(isa<WSXTOperator>(I) ){ 
-        if((Record[OpNum] & (1 << bitc::WSXTO_WAS_SEXT ))){
-          cast<CastInst>(I)->setWasSext(true); 
+      if(OpNum < Record.size() ){
+        if(isa<WSXTOperator>(I) ){ 
+          if((Record[OpNum] & (1 << bitc::WSXTO_WAS_SEXT ))){
+            cast<CastInst>(I)->setWasSext(true); 
+          }
         }
       }
       

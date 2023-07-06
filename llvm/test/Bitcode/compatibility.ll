@@ -1447,7 +1447,7 @@ define void @instructions.conversions() {
   trunc i32 -1 to i1
   ; CHECK: trunc i32 -1 to i1
   zext i32 -1 to i64
-  ; CHECK: zext was_sext i32 -1 to i64
+  ; CHECK: zext i32 -1 to i64
   sext i32 -1 to i64
   ; CHECK: sext i32 -1 to i64
   fptrunc float undef to half
