@@ -546,6 +546,8 @@ static Instruction *foldCttzCtlz(IntrinsicInst &II, InstCombinerImpl &IC) {
     // cttz(sext(x)) -> cttz(zext(x))
     if (match(Op0, m_OneUse(m_SExt(m_Value(X))))) {
       auto *Zext = IC.Builder.CreateZExt(X, II.getType());
+      if(auto ZExtInst = dyn_cast<ZExtInst>(Zext))
+        ZExtInst->setWasSext(true);
       auto *CttzZext =
           IC.Builder.CreateBinaryIntrinsic(Intrinsic::cttz, Zext, Op1);
       return IC.replaceInstUsesWith(II, CttzZext);
